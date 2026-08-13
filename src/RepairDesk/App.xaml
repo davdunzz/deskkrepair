@@ -3,16 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
   <Application.Resources>
-    <SolidColorBrush x:Key="Primary" Color="#1769E8"/>
-    <SolidColorBrush x:Key="PrimaryDark" Color="#0B3F98"/>
-    <SolidColorBrush x:Key="Accent" Color="#FFC928"/>
-    <SolidColorBrush x:Key="PageBg" Color="#F3F6FA"/>
-    <SolidColorBrush x:Key="Text" Color="#111C2F"/>
-    <SolidColorBrush x:Key="MutedText" Color="#5F6C80"/>
+    <SolidColorBrush x:Key="Primary" Color="#5856E8"/>
+    <SolidColorBrush x:Key="PrimaryDark" Color="#403EC2"/>
+    <SolidColorBrush x:Key="Accent" Color="#F6C945"/>
+    <SolidColorBrush x:Key="PageBg" Color="#F5F6F8"/>
+    <SolidColorBrush x:Key="Text" Color="#141722"/>
+    <SolidColorBrush x:Key="MutedText" Color="#687083"/>
     <SolidColorBrush x:Key="Card" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="Stroke" Color="#D7DFEA"/>
-    <SolidColorBrush x:Key="MainGradient" Color="#F3F6FA"/>
-    <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#0B214A" Offset="0"/><GradientStop Color="#1052B7" Offset="0.58"/><GradientStop Color="#1976E9" Offset="1"/></LinearGradientBrush>
+    <SolidColorBrush x:Key="MainGradient" Color="#F5F6F8"/>
+    <SolidColorBrush x:Key="HeaderGradient" Color="#FFFFFF"/>
 
     <DropShadowEffect x:Key="CardShadow" Color="#172B4D" BlurRadius="18" ShadowDepth="3" Opacity="0.12"/>
 
@@ -20,12 +20,12 @@
 
     <Style TargetType="Button">
       <Setter Property="Padding" Value="18,11"/><Setter Property="Margin" Value="4"/><Setter Property="Background" Value="{StaticResource Primary}"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderThickness" Value="0"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FontSize" Value="13"/>
-      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="9" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextElement.Foreground="{TemplateBinding Foreground}"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.86"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.68"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.42"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.86"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.68"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.42"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
     </Style>
 
     <Style x:Key="SidebarButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-      <Setter Property="Foreground" Value="#FFFFFFFF"/><Setter Property="Background" Value="#16FFFFFF"/><Setter Property="HorizontalContentAlignment" Value="Left"/><Setter Property="Margin" Value="0,4"/><Setter Property="Padding" Value="16,13"/><Setter Property="FontSize" Value="13"/>
-      <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#2F64A8FF"/><Setter Property="Foreground" Value="White"/></Trigger></Style.Triggers>
+      <Setter Property="Foreground" Value="White"/><Setter Property="Background" Value="Transparent"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Margin" Value="0,3"/><Setter Property="Padding" Value="12,10"/><Setter Property="FontSize" Value="13"/>
+      <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#242A39"/></Trigger></Style.Triggers>
     </Style>
 
     <Style TargetType="TextBox">
@@ -42,7 +42,7 @@
     </Style>
 
     <Style TargetType="TabItem"><Setter Property="Foreground" Value="{StaticResource Text}"/><Setter Property="Background" Value="White"/><Setter Property="Padding" Value="14,9"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
-    <Style x:Key="SideNavigationTabs" TargetType="TabControl"><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabControl"><Border Background="Transparent"><ContentPresenter ContentSource="SelectedContent"/></Border></ControlTemplate></Setter.Value></Setter></Style>
+    <Style x:Key="SideNavigationTabs" TargetType="TabControl"><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabControl"><Border Background="Transparent"><ContentPresenter Content="{TemplateBinding SelectedContent}" ContentTemplate="{TemplateBinding SelectedContentTemplate}" ContentTemplateSelector="{TemplateBinding SelectedContentTemplateSelector}"/></Border></ControlTemplate></Setter.Value></Setter></Style>
 
     <Style TargetType="DataGrid"><Setter Property="Foreground" Value="{StaticResource Text}"/><Setter Property="Background" Value="White"/><Setter Property="RowBackground" Value="White"/><Setter Property="AlternatingRowBackground" Value="#F7F9FC"/><Setter Property="RowHeight" Value="46"/><Setter Property="HeadersVisibility" Value="Column"/><Setter Property="GridLinesVisibility" Value="Horizontal"/><Setter Property="HorizontalGridLinesBrush" Value="#E7ECF3"/><Setter Property="BorderBrush" Value="{StaticResource Stroke}"/><Setter Property="BorderThickness" Value="1"/></Style>
     <Style TargetType="ListBox"><Setter Property="Foreground" Value="{StaticResource Text}"/><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="{StaticResource Stroke}"/></Style>

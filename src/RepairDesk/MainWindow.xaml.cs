@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace RepairDesk;
 
@@ -24,14 +25,34 @@ public partial class MainWindow : Window
         RefreshInventory();
         AppointmentsCalendar.SelectedDate = DateTime.Today;
         RefreshCalendar();
+        SelectSection(0);
     }
 
-    private void NavNewRepair_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 0;
-    private void NavInventory_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 1;
-    private void NavArchive_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 2;
-    private void NavCalendar_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 3;
-    private void NavCatalog_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 4;
-    private void NavSettings_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 5;
+    private void SelectSection(int index)
+    {
+        Button[] navigationButtons =
+        [
+            NavNewButton,
+            NavInventoryButton,
+            NavArchiveButton,
+            NavCalendarButton,
+            NavCatalogButton,
+            NavSettingsButton
+        ];
+
+        foreach (var button in navigationButtons)
+            button.ClearValue(BackgroundProperty);
+
+        navigationButtons[index].Background = new SolidColorBrush(Color.FromRgb(0x58, 0x56, 0xE8));
+        MainTabs.SelectedIndex = index;
+    }
+
+    private void NavNewRepair_Click(object sender, RoutedEventArgs e) => SelectSection(0);
+    private void NavInventory_Click(object sender, RoutedEventArgs e) => SelectSection(1);
+    private void NavArchive_Click(object sender, RoutedEventArgs e) => SelectSection(2);
+    private void NavCalendar_Click(object sender, RoutedEventArgs e) => SelectSection(3);
+    private void NavCatalog_Click(object sender, RoutedEventArgs e) => SelectSection(4);
+    private void NavSettings_Click(object sender, RoutedEventArgs e) => SelectSection(5);
 
     private void ReloadCatalog()
     {
