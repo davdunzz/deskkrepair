@@ -7,6 +7,7 @@ public sealed class RepairRecord
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? AppointmentAt { get; set; }
     public string EmployeeCode { get; set; } = "";
+    public string Status { get; set; } = "DA FARE";
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
     public string Phone { get; set; } = "";
@@ -24,7 +25,19 @@ public sealed class RepairRecord
     public string DisplayName => $"{FirstName} {LastName}".Trim();
     public string Device => $"{Brand} {Model}".Trim();
     public string AppointmentText => AppointmentAt?.ToString("dd/MM/yyyy HH:mm") ?? "—";
-    public string CalendarText => AppointmentAt is null ? "" : $"{AppointmentAt:HH:mm}  {DisplayName} — {Device}  •  Operatore: {EmployeeCode}";
+    public string CalendarText => AppointmentAt is null ? "" : $"{AppointmentAt:HH:mm}  {DisplayName} — {Device}  •  {Status}  •  Operatore: {EmployeeCode}";
+    public string DashboardAppointmentText => AppointmentAt is null ? "" : $"{AppointmentAt:dd/MM/yyyy HH:mm}  •  {DisplayName}  •  {Device}  •  {Status}";
+}
+
+public sealed class TechnicalManual
+{
+    public int Id { get; set; }
+    public string Brand { get; set; } = "";
+    public string Model { get; set; } = "";
+    public string Title { get; set; } = "";
+    public string FilePath { get; set; } = "";
+    public DateTime AddedAt { get; set; } = DateTime.Now;
+    public string FileName => Path.GetFileName(FilePath);
 }
 
 public sealed class InventoryItem

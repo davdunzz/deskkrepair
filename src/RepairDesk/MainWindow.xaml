@@ -12,10 +12,12 @@
         <StackPanel><StackPanel Orientation="Horizontal"><Border Width="48" Height="48" CornerRadius="13" Background="#171A24" Padding="5"><Image Source="Assets/RepairDesk.png" Stretch="Uniform"/></Border><StackPanel Margin="12,4,0,0"><TextBlock Text="RepairDesk" Foreground="White" FontSize="19" FontWeight="Bold"/><TextBlock Text="SERVICE SUITE" Foreground="#F6C945" FontSize="9" FontWeight="Bold"/></StackPanel></StackPanel></StackPanel>
         <StackPanel Grid.Row="1" Margin="0,34,0,0">
           <TextBlock Text="WORKSPACE" Foreground="#DCEAFF" FontSize="10" FontWeight="Bold" Margin="12,0,0,9"/>
+          <Button x:Name="NavDashboardButton" Style="{StaticResource SidebarButton}" Click="NavDashboard_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="⌂" Foreground="White" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Dashboard" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
           <Button x:Name="NavNewButton" Style="{StaticResource SidebarButton}" Click="NavNewRepair_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="＋" Foreground="White" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Nuova riparazione" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
           <Button x:Name="NavInventoryButton" Style="{StaticResource SidebarButton}" Click="NavInventory_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="▣" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Magazzino" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
           <Button x:Name="NavArchiveButton" Style="{StaticResource SidebarButton}" Click="NavArchive_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="▤" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Archivio" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
           <Button x:Name="NavCalendarButton" Style="{StaticResource SidebarButton}" Click="NavCalendar_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="▦" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Calendario" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
+          <Button x:Name="NavManualsButton" Style="{StaticResource SidebarButton}" Click="NavManuals_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="▧" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Manuali tecnici" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
           <Button x:Name="NavCatalogButton" Style="{StaticResource SidebarButton}" Click="NavCatalog_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="◇" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Catalogo telefoni" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
           <Button x:Name="NavSettingsButton" Style="{StaticResource SidebarButton}" Click="NavSettings_Click"><StackPanel Orientation="Horizontal"><Border Width="31" Height="31" CornerRadius="8" Background="#252938"><TextBlock Text="⚙" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock Text="Impostazioni" Foreground="White" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/></StackPanel></Button>
         </StackPanel>
@@ -32,6 +34,21 @@
     </Border>
 
     <TabControl Grid.Row="1" Margin="22,18" Background="Transparent" BorderThickness="0" x:Name="MainTabs" Style="{StaticResource SideNavigationTabs}">
+      <TabItem Header="DASHBOARD">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8,16"><StackPanel MaxWidth="1180">
+          <TextBlock Text="Panoramica operativa" FontSize="27" FontWeight="Bold" Margin="0,0,0,16"/>
+          <Grid Margin="0,0,0,18"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="#EAF1FF" CornerRadius="14" Padding="20" Margin="0,0,10,0"><StackPanel><TextBlock Text="DA FARE" Foreground="#145EDB" FontWeight="Bold"/><TextBlock x:Name="DashboardTodoCount" Text="0" FontSize="34" FontWeight="Bold"/></StackPanel></Border>
+            <Border Grid.Column="1" Background="#FFF0F1" CornerRadius="14" Padding="20" Margin="5,0"><StackPanel><TextBlock Text="CRITICI / URGENTI" Foreground="#C43E4D" FontWeight="Bold"/><TextBlock x:Name="DashboardCriticalCount" Text="0" FontSize="34" FontWeight="Bold"/></StackPanel></Border>
+            <Border Grid.Column="2" Background="#FFF7D6" CornerRadius="14" Padding="20" Margin="10,0,0,0"><StackPanel><TextBlock Text="RICAMBI DA ORDINARE" Foreground="#9A6B00" FontWeight="Bold"/><TextBlock x:Name="DashboardOrderCount" Text="0" FontSize="34" FontWeight="Bold"/></StackPanel></Border>
+          </Grid>
+          <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+            <GroupBox Header="Prossimi appuntamenti" Margin="0,0,9,18"><ListBox x:Name="DashboardAppointmentsList" MinHeight="190" DisplayMemberPath="DashboardAppointmentText"/></GroupBox>
+            <GroupBox Grid.Column="1" Header="Appuntamenti ancora da fissare" Margin="9,0,0,18"><ListBox x:Name="DashboardUnscheduledList" MinHeight="190"><ListBox.ItemTemplate><DataTemplate><StackPanel Margin="6"><TextBlock Text="{Binding DisplayName}" FontWeight="Bold"/><TextBlock Text="{Binding Device}"/><TextBlock Text="{Binding RepairDescription}" Foreground="#687083" TextWrapping="Wrap"/></StackPanel></DataTemplate></ListBox.ItemTemplate></ListBox></GroupBox>
+            <GroupBox Grid.Row="1" Grid.ColumnSpan="2" Header="Ricambi in esaurimento (quantità 1 o 2)"><DataGrid x:Name="DashboardLowStockGrid" AutoGenerateColumns="False" IsReadOnly="True" MinHeight="170"><DataGrid.Columns><DataGridTextColumn Header="Codice" Binding="{Binding Code}" Width="160"/><DataGridTextColumn Header="Ricambio" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="Categoria" Binding="{Binding Category}" Width="180"/><DataGridTextColumn Header="Quantità" Binding="{Binding Quantity}" Width="100"/></DataGrid.Columns></DataGrid></GroupBox>
+          </Grid>
+        </StackPanel></ScrollViewer>
+      </TabItem>
       <TabItem Header="NUOVA RIPARAZIONE">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8,16">
           <StackPanel MaxWidth="1100">
@@ -63,6 +80,10 @@
                 <StackPanel Width="220"><TextBlock Text="Codice dipendente"/><TextBox x:Name="EmployeeCodeBox" MaxLength="30"/></StackPanel>
                 <Button Content="RIMUOVI DATA" Background="#6D7588" VerticalAlignment="Bottom" Margin="4,5,4,10" Click="ClearAppointment_Click"/>
               </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Stato della riparazione">
+              <StackPanel><TextBlock Text="Stato iniziale"/><ComboBox x:Name="RepairStatusBox" SelectedIndex="0"><ComboBoxItem Content="DA FARE"/><ComboBoxItem Content="ORDINARE RICAMBIO"/><ComboBoxItem Content="FATTO"/><ComboBoxItem Content="CRITICO / URGENTE"/></ComboBox></StackPanel>
             </GroupBox>
 
             <GroupBox Header="4. Ricambi utilizzati dal magazzino">
@@ -148,10 +169,18 @@
               <DataGridTextColumn Header="Dispositivo" Binding="{Binding Device}" Width="*"/>
               <DataGridTextColumn Header="Appuntamento" Binding="{Binding AppointmentText}" Width="145"/>
               <DataGridTextColumn Header="Operatore" Binding="{Binding EmployeeCode}" Width="105"/>
+              <DataGridTextColumn Header="Stato" Binding="{Binding Status}" Width="155"/>
               <DataGridTextColumn Header="Riparazione" Binding="{Binding RepairDescription}" Width="2*"/>
             </DataGrid.Columns>
           </DataGrid>
-          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="GENERA LISTA RIPARAZIONI" Background="#F5B82E" Foreground="#172033" Click="GenerateAppointmentList_Click"/><Button Content="AGGIORNA" Background="#61718D" Click="RefreshArchive_Click"/><Button Content="MODIFICA" Background="#F0A52B" Click="EditRepair_Click"/><Button Content="ELIMINA" Background="#E34F64" Click="DeleteRepair_Click"/><Button Content="STAMPA / GENERA PDF" Click="RegeneratePdf_Click"/></StackPanel>
+          <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Orientation="Horizontal"><ComboBox x:Name="ArchiveStatusBox" Width="190" SelectedIndex="0"><ComboBoxItem Content="DA FARE"/><ComboBoxItem Content="ORDINARE RICAMBIO"/><ComboBoxItem Content="FATTO"/><ComboBoxItem Content="CRITICO / URGENTE"/></ComboBox><Button Content="APPLICA STATO" Click="ApplyArchiveStatus_Click"/></StackPanel><WrapPanel Grid.Column="1" HorizontalAlignment="Right"><Button Content="GENERA LISTA" Background="#F5B82E" Foreground="#172033" Click="GenerateAppointmentList_Click"/><Button Content="AGGIORNA" Background="#61718D" Click="RefreshArchive_Click"/><Button Content="MODIFICA" Background="#F0A52B" Click="EditRepair_Click"/><Button Content="ELIMINA" Background="#E34F64" Click="DeleteRepair_Click"/><Button Content="SOLO QR" Background="#403EC2" Click="GenerateQrOnly_Click"/><Button Content="SCHEDA + QR" Click="RegeneratePdf_Click"/></WrapPanel></Grid>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="MANUALI TECNICI">
+        <Grid Margin="8,16"><Grid.ColumnDefinitions><ColumnDefinition Width="350"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+          <GroupBox Header="Carica manuale o fotografia" Margin="0,0,18,0"><StackPanel><TextBlock Text="Marca *"/><ComboBox x:Name="ManualBrandBox" IsEditable="True" SelectionChanged="ManualBrandBox_SelectionChanged"/><TextBlock Text="Modello *"/><ComboBox x:Name="ManualModelBox" IsEditable="True"/><TextBlock Text="Titolo / descrizione *"/><TextBox x:Name="ManualTitleBox"/><TextBlock Text="File selezionato"/><TextBox x:Name="ManualFileBox" IsReadOnly="True"/><Button Content="SCEGLI PDF, FOTO O DOCUMENTO" Click="ChooseManualFile_Click"/><Button Content="SALVA NELL'ARCHIVIO OFFLINE" Background="#138A72" Click="SaveManual_Click"/></StackPanel></GroupBox>
+          <Grid Grid.Column="1"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><DockPanel><Button DockPanel.Dock="Right" Content="FILTRA" Click="RefreshManuals_Click"/><ComboBox x:Name="ManualFilterBrandBox" Width="210" IsEditable="True" SelectionChanged="ManualFilterBrandBox_SelectionChanged"/><ComboBox x:Name="ManualFilterModelBox" Width="230" IsEditable="True"/></DockPanel><DataGrid Grid.Row="1" x:Name="ManualsGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,10" MouseDoubleClick="ManualsGrid_MouseDoubleClick"><DataGrid.Columns><DataGridTextColumn Header="Marca" Binding="{Binding Brand}" Width="150"/><DataGridTextColumn Header="Modello" Binding="{Binding Model}" Width="180"/><DataGridTextColumn Header="Titolo" Binding="{Binding Title}" Width="*"/><DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="220"/></DataGrid.Columns></DataGrid><StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="APRI" Click="OpenManual_Click"/><Button Content="ELIMINA" Background="#C43E4D" Click="DeleteManual_Click"/></StackPanel></Grid>
         </Grid>
       </TabItem>
 

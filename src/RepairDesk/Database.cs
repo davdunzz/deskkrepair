@@ -34,10 +34,15 @@ public static class Database
                 PRIMARY KEY(RepairId, PartId), FOREIGN KEY(RepairId) REFERENCES Repairs(Id) ON DELETE CASCADE,
                 FOREIGN KEY(PartId) REFERENCES InventoryParts(Id)
             );
+            CREATE TABLE IF NOT EXISTS TechnicalManuals (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT, Brand TEXT NOT NULL, Model TEXT NOT NULL,
+                Title TEXT NOT NULL, FilePath TEXT NOT NULL, AddedAt TEXT NOT NULL
+            );
             """;
         command.ExecuteNonQuery();
         EnsureColumn(connection, "Repairs", "AppointmentAt", "TEXT NULL");
         EnsureColumn(connection, "Repairs", "EmployeeCode", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumn(connection, "Repairs", "Status", "TEXT NOT NULL DEFAULT 'DA FARE'");
         SeedCatalog(connection);
     }
 
@@ -51,9 +56,19 @@ public static class Database
         {
             if (File.Exists(targetPath)) File.Copy(targetPath, targetPath + $".backup-{DateTime.Now:yyyyMMdd-HHmmss}", true);
             File.Copy(currentPath, targetPath, true);
+            var sourceManuals = Path.Combine(Path.GetDirectoryName(currentPath)!, "Manuali");
+            var targetManuals = Path.Combine(targetFolder, "Manuali");
+            if (Directory.Exists(sourceManuals)) CopyDirectory(sourceManuals, targetManuals);
         }
         StorageConfig.Save(newOptions);
         Initialize();
+    }
+
+    private static void CopyDirectory(string source, string destination)
+    {
+        Directory.CreateDirectory(destination);
+        foreach (var file in Directory.GetFiles(source)) File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
+        foreach (var directory in Directory.GetDirectories(source)) CopyDirectory(directory, Path.Combine(destination, Path.GetFileName(directory)));
     }
 
     private static void EnsureColumn(SqliteConnection connection, string table, string column, string definition)
@@ -156,14 +171,15 @@ public static class Database
         using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = """
-            INSERT INTO Repairs(PracticeNumber,CreatedAt,AppointmentAt,EmployeeCode,FirstName,LastName,Phone,Email,Brand,Model,Color,Imei,RepairDescription,RepairTypes,Accessories,DeviceConditions,ConditionNotes)
-            VALUES($practice,$created,$appointment,$employee,$first,$last,$phone,$email,$brand,$model,$color,$imei,$description,$types,$accessories,$conditions,$notes);
+            INSERT INTO Repairs(PracticeNumber,CreatedAt,AppointmentAt,EmployeeCode,Status,FirstName,LastName,Phone,Email,Brand,Model,Color,Imei,RepairDescription,RepairTypes,Accessories,DeviceConditions,ConditionNotes)
+            VALUES($practice,$created,$appointment,$employee,$status,$first,$last,$phone,$email,$brand,$model,$color,$imei,$description,$types,$accessories,$conditions,$notes);
             SELECT last_insert_rowid();
             """;
         command.Parameters.AddWithValue("$practice", item.PracticeNumber);
         command.Parameters.AddWithValue("$created", item.CreatedAt.ToString("O"));
         command.Parameters.AddWithValue("$appointment", item.AppointmentAt?.ToString("O") ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("$employee", item.EmployeeCode);
+        command.Parameters.AddWithValue("$status", item.Status);
         command.Parameters.AddWithValue("$first", item.FirstName);
         command.Parameters.AddWithValue("$last", item.LastName);
         command.Parameters.AddWithValue("$phone", item.Phone);
@@ -191,7 +207,7 @@ public static class Database
         using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = """
-            UPDATE Repairs SET AppointmentAt=$appointment,EmployeeCode=$employee,FirstName=$first,LastName=$last,Phone=$phone,Email=$email,Brand=$brand,Model=$model,
+            UPDATE Repairs SET AppointmentAt=$appointment,EmployeeCode=$employee,Status=$status,FirstName=$first,LastName=$last,Phone=$phone,Email=$email,Brand=$brand,Model=$model,
             Color=$color,Imei=$imei,RepairDescription=$description,RepairTypes=$types,Accessories=$accessories,DeviceConditions=$conditions,ConditionNotes=$notes
             WHERE Id=$id
             """;
@@ -206,6 +222,7 @@ public static class Database
     {
         command.Parameters.AddWithValue("$appointment", item.AppointmentAt?.ToString("O") ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("$employee", item.EmployeeCode);
+        command.Parameters.AddWithValue("$status", item.Status);
         command.Parameters.AddWithValue("$first", item.FirstName); command.Parameters.AddWithValue("$last", item.LastName);
         command.Parameters.AddWithValue("$phone", item.Phone); command.Parameters.AddWithValue("$email", item.Email);
         command.Parameters.AddWithValue("$brand", item.Brand); command.Parameters.AddWithValue("$model", item.Model);
@@ -223,6 +240,13 @@ public static class Database
         command.CommandText = "UPDATE Repairs SET AppointmentAt=$appointment WHERE Id=$id";
         command.Parameters.AddWithValue("$appointment", appointment?.ToString("O") ?? (object)DBNull.Value);
         command.Parameters.AddWithValue("$id", id); command.ExecuteNonQuery();
+    }
+
+    public static void UpdateStatus(int id, string status)
+    {
+        using var connection = Open(); using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE Repairs SET Status=$status WHERE Id=$id";
+        command.Parameters.AddWithValue("$status", status); command.Parameters.AddWithValue("$id", id); command.ExecuteNonQuery();
     }
 
     public static void DeleteRepair(int id)
@@ -246,7 +270,7 @@ public static class Database
         using var connection = Open();
         using var command = connection.CreateCommand();
         command.CommandText = """
-            SELECT Id,PracticeNumber,CreatedAt,FirstName,LastName,Phone,Email,Brand,Model,Color,Imei,RepairDescription,RepairTypes,Accessories,DeviceConditions,ConditionNotes,AppointmentAt,EmployeeCode
+            SELECT Id,PracticeNumber,CreatedAt,FirstName,LastName,Phone,Email,Brand,Model,Color,Imei,RepairDescription,RepairTypes,Accessories,DeviceConditions,ConditionNotes,AppointmentAt,EmployeeCode,Status
             FROM Repairs WHERE $q='' OR PracticeNumber LIKE $like OR FirstName LIKE $like OR LastName LIKE $like OR Phone LIKE $like OR Email LIKE $like OR Imei LIKE $like
             ORDER BY Id DESC LIMIT 500
             """;
@@ -267,7 +291,8 @@ public static class Database
         Brand = r.GetString(7), Model = r.GetString(8), Color = r.GetString(9), Imei = r.GetString(10), RepairDescription = r.GetString(11),
         RepairTypes = JsonSerializer.Deserialize<List<string>>(r.GetString(12)) ?? [], Accessories = JsonSerializer.Deserialize<List<string>>(r.GetString(13)) ?? [],
         DeviceConditions = JsonSerializer.Deserialize<List<string>>(r.GetString(14)) ?? [], ConditionNotes = r.GetString(15),
-        AppointmentAt = r.IsDBNull(16) ? null : DateTime.Parse(r.GetString(16)), EmployeeCode = r.IsDBNull(17) ? "" : r.GetString(17)
+        AppointmentAt = r.IsDBNull(16) ? null : DateTime.Parse(r.GetString(16)), EmployeeCode = r.IsDBNull(17) ? "" : r.GetString(17),
+        Status = r.IsDBNull(18) ? "DA FARE" : r.GetString(18)
     };
 
     public static List<RepairRecord> GetAppointments(DateTime day) => SearchRepairs()
@@ -347,6 +372,37 @@ public static class Database
     }
 
     public static string NextPracticeNumber() => $"R-{DateTime.Now:yyyyMMdd-HHmmssfff}";
+
+    public static string GetManualsFolder()
+    {
+        var folder = Path.Combine(DataFolder, "Manuali"); Directory.CreateDirectory(folder); return folder;
+    }
+
+    public static List<TechnicalManual> GetManuals(string brand = "", string model = "")
+    {
+        using var connection = Open(); using var command = connection.CreateCommand();
+        command.CommandText = "SELECT Id,Brand,Model,Title,FilePath,AddedAt FROM TechnicalManuals WHERE ($brand='' OR Brand=$brand COLLATE NOCASE) AND ($model='' OR Model=$model COLLATE NOCASE) ORDER BY Brand,Model,Title";
+        command.Parameters.AddWithValue("$brand", brand.Trim()); command.Parameters.AddWithValue("$model", model.Trim());
+        using var reader = command.ExecuteReader(); var result = new List<TechnicalManual>();
+        while (reader.Read())
+        {
+            var storedPath = reader.GetString(4);
+            result.Add(new TechnicalManual { Id=reader.GetInt32(0), Brand=reader.GetString(1), Model=reader.GetString(2), Title=reader.GetString(3), FilePath=Path.IsPathRooted(storedPath) ? storedPath : Path.Combine(GetManualsFolder(), storedPath), AddedAt=DateTime.Parse(reader.GetString(5)) });
+        }
+        return result;
+    }
+
+    public static void SaveManual(TechnicalManual item)
+    {
+        using var connection = Open(); using var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO TechnicalManuals(Brand,Model,Title,FilePath,AddedAt) VALUES($brand,$model,$title,$path,$added)";
+        command.Parameters.AddWithValue("$brand", item.Brand); command.Parameters.AddWithValue("$model", item.Model); command.Parameters.AddWithValue("$title", item.Title); command.Parameters.AddWithValue("$path", item.FilePath); command.Parameters.AddWithValue("$added", item.AddedAt.ToString("O")); command.ExecuteNonQuery();
+    }
+
+    public static void DeleteManual(int id)
+    {
+        using var connection = Open(); using var command = connection.CreateCommand(); command.CommandText = "DELETE FROM TechnicalManuals WHERE Id=$id"; command.Parameters.AddWithValue("$id", id); command.ExecuteNonQuery();
+    }
 
     public static ShopSettings LoadSettings()
     {

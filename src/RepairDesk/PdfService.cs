@@ -2,6 +2,8 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.IO;
+using QRCoder;
+using System.Text;
 
 namespace RepairDesk;
 
@@ -38,6 +40,7 @@ public static class PdfService
                             c.Item().Row(r => { r.RelativeItem().Text($"Cliente: {item.DisplayName}").Bold(); r.RelativeItem().Text($"Telefono: {item.Phone}"); });
                             c.Item().PaddingTop(3).Text($"Dispositivo: {item.Device}" + (string.IsNullOrWhiteSpace(item.Imei) ? "" : $"   •   IMEI: {item.Imei}"));
                             c.Item().PaddingTop(3).Text($"Intervento: {item.RepairDescription}");
+                            c.Item().PaddingTop(3).Text($"Stato: {item.Status}").Bold();
                             c.Item().PaddingTop(3).Text($"Operatore: {Value(item.EmployeeCode)}" + (item.UsedParts.Count == 0 ? "" : $"   •   Ricambi: {string.Join(", ", item.UsedParts.Select(x => x.Display))}"));
                             c.Item().PaddingTop(9).Text("NOTE / APPUNTI").Bold().FontColor("#1267E8");
                             c.Item().PaddingTop(7).Height(48).BorderBottom(1).BorderColor("#AAB2C2");
@@ -56,8 +59,10 @@ public static class PdfService
         Directory.CreateDirectory(folder);
         destination ??= Path.Combine(folder, $"{repair.PracticeNumber}_{SafeName(repair.DisplayName)}.pdf");
 
-        Document.Create(document => document.Page(page =>
+        Document.Create(document =>
         {
+          document.Page(page =>
+          {
             page.Size(PageSizes.A4);
             page.Margin(35);
             page.DefaultTextStyle(x => x.FontSize(10).FontColor("#172033"));
@@ -82,6 +87,7 @@ public static class PdfService
                 Section(column, "DISPOSITIVO", $"{repair.Device}\nColore: {Value(repair.Color)}    IMEI/Seriale: {Value(repair.Imei)}");
                 if (repair.AppointmentAt is not null) Section(column, "APPUNTAMENTO", repair.AppointmentAt.Value.ToString("dddd d MMMM yyyy 'alle' HH:mm", new System.Globalization.CultureInfo("it-IT")));
                 Section(column, "OPERATORE", Value(repair.EmployeeCode));
+                Section(column, "STATO RIPARAZIONE", repair.Status);
                 Section(column, "RIPARAZIONE RICHIESTA", repair.RepairDescription);
                 if (repair.UsedParts.Count > 0) Section(column, "RICAMBI UTILIZZATI", string.Join(" • ", repair.UsedParts.Select(x => x.Display)));
                 Section(column, "TIPOLOGIA INTERVENTO", Join(repair.RepairTypes));
@@ -96,8 +102,57 @@ public static class PdfService
                 });
             });
             page.Footer().AlignCenter().Text("Il cliente dichiara che i dati e lo stato del dispositivo indicati sono corretti.").FontSize(8).FontColor(Colors.Grey.Medium);
-        })).GeneratePdf(destination);
+          });
+          AddQrPage(document, repair, shop);
+        }).GeneratePdf(destination);
         return destination;
+    }
+
+    public static string GenerateQrOnly(RepairRecord repair, ShopSettings shop)
+    {
+        var folder = StorageConfig.GetPdfFolder(); Directory.CreateDirectory(folder);
+        var destination = Path.Combine(folder, $"QR_{repair.PracticeNumber}_{SafeName(repair.DisplayName)}.pdf");
+        Document.Create(document => AddQrPage(document, repair, shop)).GeneratePdf(destination);
+        return destination;
+    }
+
+    private static void AddQrPage(IDocumentContainer document, RepairRecord repair, ShopSettings shop)
+    {
+        var qrBytes = CreateQr(repair, shop);
+        document.Page(page =>
+        {
+            page.Size(PageSizes.A4); page.Margin(55); page.DefaultTextStyle(x => x.FontColor("#172033"));
+            page.Content().AlignCenter().AlignMiddle().Column(column =>
+            {
+                column.Spacing(16);
+                column.Item().AlignCenter().Text(shop.ShopName).FontSize(22).Bold().FontColor("#145EDB");
+                column.Item().AlignCenter().Text("SCHEDA DIGITALE RIPARAZIONE").FontSize(15).Bold();
+                column.Item().AlignCenter().Width(330).Height(330).Image(qrBytes);
+                column.Item().AlignCenter().Text(repair.PracticeNumber).FontSize(18).Bold();
+                column.Item().AlignCenter().Text($"{repair.DisplayName} • {repair.Device}").FontSize(12);
+                column.Item().AlignCenter().Text("Scansiona il QR code per leggere i dati della scheda anche senza connessione internet.").FontSize(9).FontColor(Colors.Grey.Darken1);
+            });
+        });
+    }
+
+    private static byte[] CreateQr(RepairRecord repair, ShopSettings shop)
+    {
+        var payload = new StringBuilder()
+            .AppendLine("REPAIRDESK - SCHEDA RIPARAZIONE")
+            .AppendLine($"Centro: {shop.ShopName}")
+            .AppendLine($"Pratica: {repair.PracticeNumber}")
+            .AppendLine($"Cliente: {repair.DisplayName}")
+            .AppendLine($"Telefono: {repair.Phone}")
+            .AppendLine($"Dispositivo: {repair.Device}")
+            .AppendLine($"IMEI: {Value(repair.Imei)}")
+            .AppendLine($"Stato: {repair.Status}")
+            .AppendLine($"Appuntamento: {(repair.AppointmentAt?.ToString("dd/MM/yyyy HH:mm") ?? "Da fissare")}")
+            .AppendLine($"Riparazione: {repair.RepairDescription}")
+            .AppendLine($"Operatore: {Value(repair.EmployeeCode)}")
+            .ToString();
+        using var generator = new QRCodeGenerator();
+        using var data = generator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.M);
+        return new PngByteQRCode(data).GetGraphic(12);
     }
 
     private static void Section(ColumnDescriptor column, string title, string value)

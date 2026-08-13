@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     private RepairRecord? _editingRepair;
     private InventoryItem? _editingInventory;
     private readonly ObservableCollection<UsedPart> _usedParts = [];
+    private string _selectedManualFile = "";
 
     public MainWindow()
     {
@@ -25,6 +26,9 @@ public partial class MainWindow : Window
         RefreshInventory();
         AppointmentsCalendar.SelectedDate = DateTime.Today;
         RefreshCalendar();
+        ReloadManualCatalog();
+        RefreshManuals();
+        RefreshDashboard();
         SelectSection(0);
     }
 
@@ -32,9 +36,11 @@ public partial class MainWindow : Window
     {
         Button[] navigationButtons =
         [
+            NavDashboardButton,
             NavNewButton,
             NavInventoryButton,
             NavArchiveButton,
+            NavManualsButton,
             NavCalendarButton,
             NavCatalogButton,
             NavSettingsButton
@@ -45,14 +51,17 @@ public partial class MainWindow : Window
 
         navigationButtons[index].Background = new SolidColorBrush(Color.FromRgb(0x58, 0x56, 0xE8));
         MainTabs.SelectedIndex = index;
+        if (index == 0) RefreshDashboard();
     }
 
-    private void NavNewRepair_Click(object sender, RoutedEventArgs e) => SelectSection(0);
-    private void NavInventory_Click(object sender, RoutedEventArgs e) => SelectSection(1);
-    private void NavArchive_Click(object sender, RoutedEventArgs e) => SelectSection(2);
-    private void NavCalendar_Click(object sender, RoutedEventArgs e) => SelectSection(3);
-    private void NavCatalog_Click(object sender, RoutedEventArgs e) => SelectSection(4);
-    private void NavSettings_Click(object sender, RoutedEventArgs e) => SelectSection(5);
+    private void NavDashboard_Click(object sender, RoutedEventArgs e) => SelectSection(0);
+    private void NavNewRepair_Click(object sender, RoutedEventArgs e) => SelectSection(1);
+    private void NavInventory_Click(object sender, RoutedEventArgs e) => SelectSection(2);
+    private void NavArchive_Click(object sender, RoutedEventArgs e) => SelectSection(3);
+    private void NavCalendar_Click(object sender, RoutedEventArgs e) => SelectSection(5);
+    private void NavManuals_Click(object sender, RoutedEventArgs e) => SelectSection(4);
+    private void NavCatalog_Click(object sender, RoutedEventArgs e) => SelectSection(6);
+    private void NavSettings_Click(object sender, RoutedEventArgs e) => SelectSection(7);
 
     private void ReloadCatalog()
     {
@@ -103,7 +112,8 @@ public partial class MainWindow : Window
             MessageBox.Show(message, "Operazione completata", MessageBoxButton.OK, MessageBoxImage.Information);
             if (path is not null) Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
             ClearForm();
-            if (wasEditing) SelectSection(2);
+            if (wasEditing) SelectSection(3);
+            RefreshDashboard();
         }
         catch (Exception ex)
         {
@@ -137,7 +147,7 @@ public partial class MainWindow : Window
     private RepairRecord BuildRecord(DateTime? appointment) => new()
     {
         Id = _editingRepair?.Id ?? 0, PracticeNumber = _editingRepair?.PracticeNumber ?? Database.NextPracticeNumber(), CreatedAt = _editingRepair?.CreatedAt ?? DateTime.Now,
-        AppointmentAt = appointment, EmployeeCode = EmployeeCodeBox.Text.Trim(), FirstName = FirstNameBox.Text.Trim(), LastName = LastNameBox.Text.Trim(), Phone = PhoneBox.Text.Trim(), Email = EmailBox.Text.Trim(),
+        AppointmentAt = appointment, EmployeeCode = EmployeeCodeBox.Text.Trim(), Status = ComboText(RepairStatusBox, "DA FARE"), FirstName = FirstNameBox.Text.Trim(), LastName = LastNameBox.Text.Trim(), Phone = PhoneBox.Text.Trim(), Email = EmailBox.Text.Trim(),
         Brand = BrandBox.Text.Trim(), Model = ModelBox.Text.Trim(), Color = ColorBox.Text.Trim(), Imei = ImeiBox.Text.Trim(), RepairDescription = RepairDescriptionBox.Text.Trim(),
         RepairTypes = Checked(RepairTypesPanel), Accessories = Checked(AccessoriesPanel), DeviceConditions = Checked(ConditionsPanel), ConditionNotes = ConditionNotesBox.Text.Trim(), UsedParts = _usedParts.Select(x => new UsedPart { PartId=x.PartId,Code=x.Code,Name=x.Name,Quantity=x.Quantity }).ToList()
     };
@@ -151,6 +161,7 @@ public partial class MainWindow : Window
         foreach (var box in new[] { FirstNameBox, LastNameBox, PhoneBox, EmailBox, ColorBox, ImeiBox, RepairDescriptionBox, ConditionNotesBox, EmployeeCodeBox, PartCodeBox }) box.Clear();
         BrandBox.Text = ""; ModelBox.Text = "";
         AppointmentDatePicker.SelectedDate = null; AppointmentTimeBox.Clear();
+        RepairStatusBox.SelectedIndex = 0;
         PartQuantityBox.Text = "1"; _usedParts.Clear();
         foreach (var panel in new[] { RepairTypesPanel, AccessoriesPanel, ConditionsPanel }) foreach (var check in panel.Children.OfType<CheckBox>()) check.IsChecked = false;
         _editingRepair = null; SaveOnlyButton.Content = "SALVA NELL'ARCHIVIO";
@@ -173,6 +184,19 @@ public partial class MainWindow : Window
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
         catch (Exception ex) { MessageBox.Show(ex.Message, "Errore PDF", MessageBoxButton.OK, MessageBoxImage.Error); }
+    }
+
+    private void GenerateQrOnly_Click(object sender, RoutedEventArgs e)
+    {
+        if (ArchiveGrid.SelectedItem is not RepairRecord repair) { MessageBox.Show("Seleziona prima una riparazione dall'archivio."); return; }
+        try { var path = PdfService.GenerateQrOnly(repair, Database.LoadSettings()); Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); }
+        catch (Exception ex) { MessageBox.Show(ex.Message, "Errore QR", MessageBoxButton.OK, MessageBoxImage.Error); }
+    }
+
+    private void ApplyArchiveStatus_Click(object sender, RoutedEventArgs e)
+    {
+        if (ArchiveGrid.SelectedItem is not RepairRecord repair) { MessageBox.Show("Seleziona prima una riparazione."); return; }
+        Database.UpdateStatus(repair.Id, ComboText(ArchiveStatusBox, "DA FARE")); RefreshArchive(); RefreshDashboard();
     }
 
     private void GenerateAppointmentList_Click(object sender, RoutedEventArgs e)
@@ -202,8 +226,9 @@ public partial class MainWindow : Window
         RepairDescriptionBox.Text = repair.RepairDescription; ConditionNotesBox.Text = repair.ConditionNotes;
         SetChecks(RepairTypesPanel, repair.RepairTypes); SetChecks(AccessoriesPanel, repair.Accessories); SetChecks(ConditionsPanel, repair.DeviceConditions);
         AppointmentDatePicker.SelectedDate = repair.AppointmentAt?.Date; AppointmentTimeBox.Text = repair.AppointmentAt?.ToString("HH:mm") ?? "";
+        RepairStatusBox.Text = repair.Status;
         EmployeeCodeBox.Text = repair.EmployeeCode; _usedParts.Clear(); foreach (var part in repair.UsedParts) _usedParts.Add(new UsedPart { PartId=part.PartId,Code=part.Code,Name=part.Name,Quantity=part.Quantity });
-        SaveOnlyButton.Content = "SALVA MODIFICHE"; SelectSection(0); FirstNameBox.Focus();
+        SaveOnlyButton.Content = "SALVA MODIFICHE"; SelectSection(1); FirstNameBox.Focus();
     }
 
     private static void SetChecks(Panel panel, List<string> values)
@@ -213,7 +238,7 @@ public partial class MainWindow : Window
     {
         if (ArchiveGrid.SelectedItem is not RepairRecord repair) { MessageBox.Show("Seleziona prima una riparazione."); return; }
         if (MessageBox.Show($"Eliminare definitivamente la pratica {repair.PracticeNumber} di {repair.DisplayName}?", "Conferma eliminazione", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-        Database.DeleteRepair(repair.Id); RefreshArchive(); RefreshCalendar(); RefreshInventory();
+        Database.DeleteRepair(repair.Id); RefreshArchive(); RefreshCalendar(); RefreshInventory(); RefreshDashboard();
     }
 
     private void AppointmentsCalendar_SelectedDatesChanged(object? sender, SelectionChangedEventArgs e) => RefreshCalendar();
@@ -231,7 +256,7 @@ public partial class MainWindow : Window
         if (AppointmentsList.SelectedItem is not RepairRecord repair) return;
         var dialog = new AppointmentDialog(repair.AppointmentAt ?? DateTime.Now) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        Database.UpdateAppointment(repair.Id, dialog.Appointment); RefreshArchive(); RefreshCalendar();
+        Database.UpdateAppointment(repair.Id, dialog.Appointment); RefreshArchive(); RefreshCalendar(); RefreshDashboard();
     }
 
     private void AddUsedPart_Click(object sender, RoutedEventArgs e)
@@ -265,14 +290,14 @@ public partial class MainWindow : Window
     private void SaveInventory_Click(object sender, RoutedEventArgs e)
     {
         if(string.IsNullOrWhiteSpace(InventoryCodeBox.Text)||string.IsNullOrWhiteSpace(InventoryNameBox.Text)||!int.TryParse(InventoryQuantityBox.Text,out var qty)||qty<0){MessageBox.Show("Inserisci codice, nome e una quantità valida.");return;}
-        try{Database.SaveInventoryItem(new InventoryItem{Id=_editingInventory?.Id??0,Code=InventoryCodeBox.Text,Name=InventoryNameBox.Text,Category=string.IsNullOrWhiteSpace(InventoryCategoryBox.Text)?"Altro":InventoryCategoryBox.Text,Quantity=qty});ClearInventoryForm();RefreshInventory();}
+        try{Database.SaveInventoryItem(new InventoryItem{Id=_editingInventory?.Id??0,Code=InventoryCodeBox.Text,Name=InventoryNameBox.Text,Category=string.IsNullOrWhiteSpace(InventoryCategoryBox.Text)?"Altro":InventoryCategoryBox.Text,Quantity=qty});ClearInventoryForm();RefreshInventory();RefreshDashboard();}
         catch(Exception ex){MessageBox.Show($"Impossibile salvare il ricambio. Il codice deve essere univoco.\n\n{ex.Message}");}
     }
     private void DeleteInventory_Click(object sender, RoutedEventArgs e)
     {
         if(InventoryGrid.SelectedItem is not InventoryItem item){MessageBox.Show("Seleziona un ricambio.");return;}
         if(MessageBox.Show($"Eliminare {item.Code} — {item.Name}?","Conferma",MessageBoxButton.YesNo,MessageBoxImage.Warning)!=MessageBoxResult.Yes)return;
-        try{Database.DeleteInventoryItem(item.Id);RefreshInventory();}catch(Exception ex){MessageBox.Show(ex.Message);}
+        try{Database.DeleteInventoryItem(item.Id);RefreshInventory();RefreshDashboard();}catch(Exception ex){MessageBox.Show(ex.Message);}
     }
 
     private void AddBrand_Click(object sender, RoutedEventArgs e)
@@ -284,6 +309,65 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(CatalogBrandBox.Text) || string.IsNullOrWhiteSpace(NewModelBox.Text)) { MessageBox.Show("Indica marca e modello."); return; }
         Database.AddModel(CatalogBrandBox.Text, NewModelBox.Text); NewModelBox.Clear(); ReloadCatalog(); MessageBox.Show("Modello aggiunto.");
+    }
+
+    private static string ComboText(ComboBox box, string fallback)
+    {
+        var value = box.SelectedItem is ComboBoxItem item ? item.Content?.ToString() : box.Text;
+        return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+    }
+
+    private void RefreshDashboard()
+    {
+        if (DashboardAppointmentsList is null) return;
+        var repairs = Database.SearchRepairs();
+        DashboardAppointmentsList.ItemsSource = repairs.Where(x => x.AppointmentAt >= DateTime.Now).OrderBy(x => x.AppointmentAt).Take(12).ToList();
+        DashboardUnscheduledList.ItemsSource = repairs.Where(x => x.AppointmentAt is null && !x.Status.Equals("FATTO", StringComparison.OrdinalIgnoreCase)).OrderByDescending(x => x.CreatedAt).Take(20).ToList();
+        DashboardLowStockGrid.ItemsSource = Database.GetInventory().Where(x => x.Quantity is 1 or 2).OrderBy(x => x.Quantity).ThenBy(x => x.Name).ToList();
+        DashboardTodoCount.Text = repairs.Count(x => x.Status.Equals("DA FARE", StringComparison.OrdinalIgnoreCase)).ToString();
+        DashboardCriticalCount.Text = repairs.Count(x => x.Status.Equals("CRITICO / URGENTE", StringComparison.OrdinalIgnoreCase)).ToString();
+        DashboardOrderCount.Text = repairs.Count(x => x.Status.Equals("ORDINARE RICAMBIO", StringComparison.OrdinalIgnoreCase)).ToString();
+    }
+
+    private void ReloadManualCatalog()
+    {
+        var brands = Database.GetBrands(); ManualBrandBox.ItemsSource = brands; ManualFilterBrandBox.ItemsSource = new[] { "" }.Concat(brands).ToList();
+    }
+
+    private void ManualBrandBox_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (ManualBrandBox.SelectedItem is string brand) ManualModelBox.ItemsSource = Database.GetModels(brand); }
+    private void ManualFilterBrandBox_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (ManualFilterBrandBox.SelectedItem is string brand) ManualFilterModelBox.ItemsSource = new[] { "" }.Concat(Database.GetModels(brand)).ToList(); }
+    private void RefreshManuals_Click(object sender, RoutedEventArgs e) => RefreshManuals();
+    private void RefreshManuals() { if (ManualsGrid is not null) ManualsGrid.ItemsSource = Database.GetManuals(ManualFilterBrandBox?.Text ?? "", ManualFilterModelBox?.Text ?? ""); }
+
+    private void ChooseManualFile_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title="Scegli manuale, fotografia o documento", Filter="Documenti e immagini|*.pdf;*.png;*.jpg;*.jpeg;*.webp;*.doc;*.docx;*.txt|Tutti i file|*.*" };
+        if (dialog.ShowDialog(this) == true) { _selectedManualFile = dialog.FileName; ManualFileBox.Text = dialog.FileName; if (string.IsNullOrWhiteSpace(ManualTitleBox.Text)) ManualTitleBox.Text = Path.GetFileNameWithoutExtension(dialog.FileName); }
+    }
+
+    private void SaveManual_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ManualBrandBox.Text) || string.IsNullOrWhiteSpace(ManualModelBox.Text) || string.IsNullOrWhiteSpace(ManualTitleBox.Text) || !File.Exists(_selectedManualFile)) { MessageBox.Show("Indica marca, modello, titolo e scegli un file."); return; }
+        try
+        {
+            Database.AddModel(ManualBrandBox.Text, ManualModelBox.Text);
+            var safeBrand = SafeFolder(ManualBrandBox.Text); var safeModel = SafeFolder(ManualModelBox.Text); var folder = Path.Combine(Database.GetManualsFolder(), safeBrand, safeModel); Directory.CreateDirectory(folder);
+            var destination = Path.Combine(folder, $"{DateTime.Now:yyyyMMddHHmmss}_{Path.GetFileName(_selectedManualFile)}"); File.Copy(_selectedManualFile, destination, true);
+            Database.SaveManual(new TechnicalManual { Brand=ManualBrandBox.Text.Trim(), Model=ManualModelBox.Text.Trim(), Title=ManualTitleBox.Text.Trim(), FilePath=Path.GetRelativePath(Database.GetManualsFolder(), destination), AddedAt=DateTime.Now });
+            ManualTitleBox.Clear(); ManualFileBox.Clear(); _selectedManualFile=""; ReloadManualCatalog(); RefreshManuals(); MessageBox.Show("Manuale salvato nell'archivio offline.");
+        }
+        catch (Exception ex) { MessageBox.Show($"Impossibile salvare il manuale.\n\n{ex.Message}"); }
+    }
+
+    private static string SafeFolder(string value) => string.Concat(value.Trim().Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
+    private void ManualsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e) => OpenSelectedManual();
+    private void OpenManual_Click(object sender, RoutedEventArgs e) => OpenSelectedManual();
+    private void OpenSelectedManual() { if (ManualsGrid.SelectedItem is not TechnicalManual item) { MessageBox.Show("Seleziona un manuale."); return; } if (!File.Exists(item.FilePath)) { MessageBox.Show("Il file non è più presente nella cartella manuali."); return; } Process.Start(new ProcessStartInfo(item.FilePath) { UseShellExecute=true }); }
+    private void DeleteManual_Click(object sender, RoutedEventArgs e)
+    {
+        if (ManualsGrid.SelectedItem is not TechnicalManual item) { MessageBox.Show("Seleziona un manuale."); return; }
+        if (MessageBox.Show($"Eliminare {item.Title}?", "Conferma", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        Database.DeleteManual(item.Id); if (File.Exists(item.FilePath)) File.Delete(item.FilePath); RefreshManuals();
     }
 
     private void LoadSettings()
