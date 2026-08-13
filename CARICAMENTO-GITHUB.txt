@@ -1,0 +1,14 @@
+REPAIRDESK - ISTRUZIONI RAPIDE
+
+1) Estrai la cartella RepairDesk.
+2) Apri GitHub e crea un nuovo repository.
+3) Premi "uploading an existing file".
+4) Trascina TUTTI i file e le cartelle del progetto.
+   ATTENZIONE: deve essere caricata anche la cartella .github.
+5) Conferma con "Commit changes".
+6) Apri Actions > Crea RepairDesk per Windows > Run workflow.
+7) Attendi il segno verde, apri l'esecuzione e scarica RepairDesk-Windows-x64.
+8) Estrai lo ZIP scaricato e apri RepairDesk.exe.
+
+Il database viene creato automaticamente al primo avvio.
+I PDF vengono salvati in Documenti\RepairDesk\Schede PDF.
