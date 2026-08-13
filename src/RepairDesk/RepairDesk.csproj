@@ -8,6 +8,7 @@
     <AssemblyName>RepairDesk</AssemblyName>
     <RootNamespace>RepairDesk</RootNamespace>
     <ApplicationIcon>Assets\RepairDesk.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Assets\RepairDesk.ico" />

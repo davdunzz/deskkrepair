@@ -22,6 +22,12 @@
       <GradientStop Color="#F5F8FF" Offset="0.48"/>
       <GradientStop Color="#FFF1B5" Offset="1"/>
     </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SidebarGradient" StartPoint="0,0" EndPoint="0.85,1">
+      <GradientStop Color="#071D4D" Offset="0"/>
+      <GradientStop Color="#104EB5" Offset="0.43"/>
+      <GradientStop Color="#327EEA" Offset="0.68"/>
+      <GradientStop Color="#F4C430" Offset="1"/>
+    </LinearGradientBrush>
 
     <DropShadowEffect x:Key="CardShadow" Color="#172B4D" BlurRadius="18" ShadowDepth="3" Opacity="0.12"/>
 
