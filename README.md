@@ -4,6 +4,11 @@ Programma Windows per registrare clienti, smartphone e riparazioni, conservare l
 
 ## Funzioni incluse
 
+- Dashboard iniziale con prossimi appuntamenti, pratiche senza data, riepilogo stati e ricambi in esaurimento.
+- Stati riparazione: Da fare, Ordinare ricambio, Fatto e Critico/Urgente.
+- Scheda PDF completa con seconda pagina QR e generazione del solo QR.
+- Archivio offline di manuali tecnici, fotografie e documenti organizzati per marca e modello.
+
 - Anagrafica cliente: nome, cognome, telefono ed email.
 - Scelta smartphone a cascata: prima la marca, poi i relativi modelli.
 - Marca e modello sempre scrivibili a mano; i nuovi valori vengono salvati nel catalogo.
