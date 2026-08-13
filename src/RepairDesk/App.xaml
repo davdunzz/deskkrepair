@@ -11,8 +11,17 @@
     <SolidColorBrush x:Key="MutedText" Color="#687083"/>
     <SolidColorBrush x:Key="Card" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="Stroke" Color="#D7DFEA"/>
-    <SolidColorBrush x:Key="MainGradient" Color="#F5F6F8"/>
-    <SolidColorBrush x:Key="HeaderGradient" Color="#FFFFFF"/>
+    <LinearGradientBrush x:Key="MainGradient" StartPoint="0,0" EndPoint="1,1">
+      <GradientStop Color="#E6EFFF" Offset="0"/>
+      <GradientStop Color="#F3F7FF" Offset="0.38"/>
+      <GradientStop Color="#FFFBEA" Offset="0.72"/>
+      <GradientStop Color="#FFF0B8" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,0">
+      <GradientStop Color="#EAF1FF" Offset="0"/>
+      <GradientStop Color="#F5F8FF" Offset="0.48"/>
+      <GradientStop Color="#FFF1B5" Offset="1"/>
+    </LinearGradientBrush>
 
     <DropShadowEffect x:Key="CardShadow" Color="#172B4D" BlurRadius="18" ShadowDepth="3" Opacity="0.12"/>
 
