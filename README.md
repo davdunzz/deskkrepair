@@ -14,7 +14,10 @@ Programma Windows per registrare clienti, smartphone e riparazioni, conservare l
 - Appuntamento facoltativo con data e ora.
 - Calendario delle riparazioni programmate e riprogrammazione al doppio clic.
 - Salvataggio senza PDF, modifica, eliminazione e ristampa dall'archivio.
-- PDF riepilogativo di tutti gli appuntamenti, con spazio Note/Appunti per ciascuno.
+- PDF riepilogativo di tutte le riparazioni, comprese quelle senza appuntamento, con spazio Note/Appunti per ciascuna.
+- Interfaccia Liquid Glass blu e gialla con pannelli traslucidi e comandi moderni.
+- Icona originale RepairDesk integrata nell'EXE, nella finestra e nella barra di Windows.
+- Navigazione laterale premium con accesso diretto a tutte le sezioni.
 - Magazzino ricambi con codice, categoria, nome, quantità e ricerca.
 - Scarico automatico dei ricambi usati e reintegro quando una pratica viene eliminata.
 - Codice dipendente nella pratica, nel calendario, nell'archivio e nei PDF.
