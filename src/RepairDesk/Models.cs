@@ -1,3 +1,4 @@
+using System.IO;
 namespace RepairDesk;
 
 public sealed class RepairRecord
