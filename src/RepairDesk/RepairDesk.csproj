@@ -7,7 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>RepairDesk</AssemblyName>
     <RootNamespace>RepairDesk</RootNamespace>
+    <ApplicationIcon>Assets\RepairDesk.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\RepairDesk.ico" />
+    <Resource Include="Assets\RepairDesk.png" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.12" />
     <PackageReference Include="QuestPDF" Version="2024.12.3" />

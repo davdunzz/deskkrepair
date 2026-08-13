@@ -26,6 +26,13 @@ public partial class MainWindow : Window
         RefreshCalendar();
     }
 
+    private void NavNewRepair_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 0;
+    private void NavInventory_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 1;
+    private void NavArchive_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 2;
+    private void NavCalendar_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 3;
+    private void NavCatalog_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 4;
+    private void NavSettings_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 5;
+
     private void ReloadCatalog()
     {
         var brands = Database.GetBrands();

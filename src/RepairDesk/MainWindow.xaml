@@ -1,18 +1,35 @@
 <Window x:Class="RepairDesk.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="RepairDesk" Height="900" Width="1220" MinHeight="700" MinWidth="980"
+        Title="RepairDesk" Icon="Assets/RepairDesk.ico" Height="900" Width="1280" MinHeight="700" MinWidth="1040"
         WindowStartupLocation="CenterScreen" Background="{StaticResource MainGradient}" FontFamily="Segoe UI Variable Text, Segoe UI">
   <Grid>
+    <Grid.ColumnDefinitions><ColumnDefinition Width="216"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+    <Border Grid.Column="0" Background="#F20A1833" BorderBrush="#3C76C5" BorderThickness="0,0,1,0" Padding="16,22">
+      <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel HorizontalAlignment="Center"><Border Width="82" Height="82" CornerRadius="22" Background="#22FFFFFF" Padding="8"><Image Source="Assets/RepairDesk.png" Stretch="Uniform"/></Border><TextBlock Text="RepairDesk" Foreground="White" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,0"/><TextBlock Text="PREMIUM DESK" Foreground="#FFD75C" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center"/></StackPanel>
+        <StackPanel Grid.Row="1" Margin="0,34,0,0">
+          <TextBlock Text="NAVIGAZIONE" Foreground="#7FA6D7" FontSize="10" FontWeight="Bold" Margin="10,0,0,8"/>
+          <Button Content="＋  Nuova riparazione" HorizontalContentAlignment="Left" Click="NavNewRepair_Click"/>
+          <Button Content="▣  Magazzino" HorizontalContentAlignment="Left" Click="NavInventory_Click"/>
+          <Button Content="▤  Archivio" HorizontalContentAlignment="Left" Click="NavArchive_Click"/>
+          <Button Content="▦  Calendario" HorizontalContentAlignment="Left" Click="NavCalendar_Click"/>
+          <Button Content="◇  Catalogo telefoni" HorizontalContentAlignment="Left" Click="NavCatalog_Click"/>
+          <Button Content="⚙  Impostazioni" HorizontalContentAlignment="Left" Click="NavSettings_Click"/>
+        </StackPanel>
+        <Border Grid.Row="2" Background="#18FFFFFF" CornerRadius="12" Padding="12"><StackPanel><TextBlock Text="●  SISTEMA OPERATIVO" Foreground="#6FE3A8" FontWeight="Bold" FontSize="10"/><TextBlock Text="Database locale protetto" Foreground="#AFC9EA" FontSize="10" Margin="0,4,0,0"/></StackPanel></Border>
+      </Grid>
+    </Border>
+    <Grid Grid.Column="1">
     <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="*"/></Grid.RowDefinitions>
     <Border Background="{StaticResource HeaderGradient}" Padding="30,13" BorderBrush="#46A8FF" BorderThickness="0,0,0,1">
       <DockPanel>
-        <StackPanel DockPanel.Dock="Left"><TextBlock Text="RepairDesk" FontSize="27" FontWeight="Bold" Foreground="White"/><TextBlock Text="SMART REPAIR MANAGEMENT" FontSize="10" FontWeight="SemiBold" Foreground="#FFE078"/></StackPanel>
+        <StackPanel DockPanel.Dock="Left"><TextBlock Text="Centro operativo" FontSize="25" FontWeight="Bold" Foreground="White"/><TextBlock Text="SMART REPAIR MANAGEMENT" FontSize="10" FontWeight="SemiBold" Foreground="#FFE078"/></StackPanel>
         <Border DockPanel.Dock="Right" Background="#24FFFFFF" CornerRadius="14" Padding="16,8" VerticalAlignment="Center"><TextBlock Text="●  Archivio locale   •   PDF automatici   •   Magazzino" Foreground="White"/></Border>
       </DockPanel>
     </Border>
 
-    <TabControl Grid.Row="1" Margin="22,18" Background="Transparent" BorderThickness="0" x:Name="MainTabs">
+    <TabControl Grid.Row="1" Margin="22,18" Background="Transparent" BorderThickness="0" x:Name="MainTabs" Style="{StaticResource SideNavigationTabs}">
       <TabItem Header="NUOVA RIPARAZIONE">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8,16">
           <StackPanel MaxWidth="1100">
@@ -190,5 +207,6 @@
         </StackPanel></ScrollViewer>
       </TabItem>
     </TabControl>
+    </Grid>
   </Grid>
 </Window>
