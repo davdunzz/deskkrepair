@@ -150,10 +150,10 @@ public partial class MainWindow : Window
     {
         try
         {
-            var appointments = Database.GetAllAppointments();
-            if (appointments.Count == 0) { MessageBox.Show("Nell'archivio non ci sono appuntamenti con data e ora."); return; }
-            var path = PdfService.GenerateAppointmentList(appointments, Database.LoadSettings());
-            MessageBox.Show($"Lista di {appointments.Count} appuntamenti creata in:\n{path}", "PDF creato", MessageBoxButton.OK, MessageBoxImage.Information);
+            var repairs = Database.GetAllRepairsForList();
+            if (repairs.Count == 0) { MessageBox.Show("Nell'archivio non ci sono riparazioni."); return; }
+            var path = PdfService.GenerateRepairList(repairs, Database.LoadSettings());
+            MessageBox.Show($"Lista di {repairs.Count} riparazioni creata in:\n{path}", "PDF creato", MessageBoxButton.OK, MessageBoxImage.Information);
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
         catch (Exception ex) { MessageBox.Show(ex.Message, "Errore PDF", MessageBoxButton.OK, MessageBoxImage.Error); }

@@ -7,31 +7,31 @@ namespace RepairDesk;
 
 public static class PdfService
 {
-    public static string GenerateAppointmentList(List<RepairRecord> appointments, ShopSettings shop)
+    public static string GenerateRepairList(List<RepairRecord> repairs, ShopSettings shop)
     {
         var folder = StorageConfig.GetPdfFolder();
         Directory.CreateDirectory(folder);
-        var destination = Path.Combine(folder, $"Lista_Appuntamenti_{DateTime.Now:yyyyMMdd_HHmm}.pdf");
+        var destination = Path.Combine(folder, $"Lista_Riparazioni_{DateTime.Now:yyyyMMdd_HHmm}.pdf");
         Document.Create(document => document.Page(page =>
         {
             page.Size(PageSizes.A4); page.Margin(32);
             page.DefaultTextStyle(x => x.FontSize(9).FontColor("#172033"));
             page.Header().Row(row =>
             {
-                row.RelativeItem().Column(c => { c.Item().Text(shop.ShopName).FontSize(21).Bold().FontColor("#5B5FEF"); c.Item().Text("LISTA APPUNTAMENTI").FontSize(14).Bold(); });
-                row.ConstantItem(180).AlignRight().Column(c => { c.Item().Text($"Generata il {DateTime.Now:dd/MM/yyyy HH:mm}"); c.Item().Text($"Totale: {appointments.Count}").Bold(); });
+                row.RelativeItem().Column(c => { c.Item().Text(shop.ShopName).FontSize(21).Bold().FontColor("#1267E8"); c.Item().Text("LISTA COMPLETA RIPARAZIONI").FontSize(14).Bold(); });
+                row.ConstantItem(180).AlignRight().Column(c => { c.Item().Text($"Generata il {DateTime.Now:dd/MM/yyyy HH:mm}"); c.Item().Text($"Totale: {repairs.Count}").Bold(); });
             });
             page.Content().PaddingVertical(16).Column(column =>
             {
-                if (appointments.Count == 0) { column.Item().Padding(20).Text("Nessun appuntamento presente nell'archivio.").FontSize(13); return; }
-                foreach (var item in appointments)
+                if (repairs.Count == 0) { column.Item().Padding(20).Text("Nessuna riparazione presente nell'archivio.").FontSize(13); return; }
+                foreach (var item in repairs)
                 {
                     column.Item().ShowEntire().PaddingBottom(12).Border(1).BorderColor("#DDE3EE").Column(card =>
                     {
-                        card.Item().Background("#5B5FEF").Padding(8).Row(row =>
+                        card.Item().Background(item.AppointmentAt is null ? "#F5B82E" : "#1267E8").Padding(8).Row(row =>
                         {
-                            row.RelativeItem().Text(item.AppointmentAt!.Value.ToString("dddd d MMMM yyyy", new System.Globalization.CultureInfo("it-IT"))).Bold().FontColor(Colors.White);
-                            row.ConstantItem(90).AlignRight().Text(item.AppointmentAt.Value.ToString("HH:mm")).FontSize(15).Bold().FontColor(Colors.White);
+                            row.RelativeItem().Text(item.AppointmentAt?.ToString("dddd d MMMM yyyy", new System.Globalization.CultureInfo("it-IT")) ?? "DA PROGRAMMARE").Bold().FontColor(item.AppointmentAt is null ? "#172033" : Colors.White);
+                            row.ConstantItem(105).AlignRight().Text(item.AppointmentAt?.ToString("HH:mm") ?? item.PracticeNumber).FontSize(item.AppointmentAt is null ? 9 : 15).Bold().FontColor(item.AppointmentAt is null ? "#172033" : Colors.White);
                         });
                         card.Item().Padding(10).Column(c =>
                         {
@@ -39,7 +39,7 @@ public static class PdfService
                             c.Item().PaddingTop(3).Text($"Dispositivo: {item.Device}" + (string.IsNullOrWhiteSpace(item.Imei) ? "" : $"   •   IMEI: {item.Imei}"));
                             c.Item().PaddingTop(3).Text($"Intervento: {item.RepairDescription}");
                             c.Item().PaddingTop(3).Text($"Operatore: {Value(item.EmployeeCode)}" + (item.UsedParts.Count == 0 ? "" : $"   •   Ricambi: {string.Join(", ", item.UsedParts.Select(x => x.Display))}"));
-                            c.Item().PaddingTop(9).Text("NOTE / APPUNTI").Bold().FontColor("#5B5FEF");
+                            c.Item().PaddingTop(9).Text("NOTE / APPUNTI").Bold().FontColor("#1267E8");
                             c.Item().PaddingTop(7).Height(48).BorderBottom(1).BorderColor("#AAB2C2");
                         });
                     });

@@ -276,6 +276,11 @@ public static class Database
     public static List<RepairRecord> GetAllAppointments() => SearchRepairs()
         .Where(x => x.AppointmentAt is not null).OrderBy(x => x.AppointmentAt).ToList();
 
+    public static List<RepairRecord> GetAllRepairsForList() => SearchRepairs()
+        .OrderBy(x => x.AppointmentAt is null ? 1 : 0)
+        .ThenBy(x => x.AppointmentAt)
+        .ThenByDescending(x => x.CreatedAt).ToList();
+
     private static List<UsedPart> GetRepairParts(SqliteConnection connection, int repairId, SqliteTransaction? transaction = null)
     {
         using var command = connection.CreateCommand();

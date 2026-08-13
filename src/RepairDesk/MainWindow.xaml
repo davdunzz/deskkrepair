@@ -2,17 +2,17 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="RepairDesk" Height="900" Width="1220" MinHeight="700" MinWidth="980"
-        WindowStartupLocation="CenterScreen" Background="{StaticResource PageBg}">
+        WindowStartupLocation="CenterScreen" Background="{StaticResource MainGradient}" FontFamily="Segoe UI Variable Text, Segoe UI">
   <Grid>
     <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-    <Border Background="#171A2B" Padding="28,14">
+    <Border Background="{StaticResource HeaderGradient}" Padding="30,13" BorderBrush="#46A8FF" BorderThickness="0,0,0,1">
       <DockPanel>
-        <StackPanel DockPanel.Dock="Left"><TextBlock Text="RepairDesk" FontSize="25" FontWeight="Bold" Foreground="White"/><TextBlock Text="Gestione riparazioni smartphone" Foreground="#AEB6D0"/></StackPanel>
-        <TextBlock DockPanel.Dock="Right" Text="Archivio locale • PDF automatici" Foreground="#AEB6D0" VerticalAlignment="Center"/>
+        <StackPanel DockPanel.Dock="Left"><TextBlock Text="RepairDesk" FontSize="27" FontWeight="Bold" Foreground="White"/><TextBlock Text="SMART REPAIR MANAGEMENT" FontSize="10" FontWeight="SemiBold" Foreground="#FFE078"/></StackPanel>
+        <Border DockPanel.Dock="Right" Background="#24FFFFFF" CornerRadius="14" Padding="16,8" VerticalAlignment="Center"><TextBlock Text="●  Archivio locale   •   PDF automatici   •   Magazzino" Foreground="White"/></Border>
       </DockPanel>
     </Border>
 
-    <TabControl Grid.Row="1" Margin="20" Background="Transparent" BorderThickness="0" x:Name="MainTabs">
+    <TabControl Grid.Row="1" Margin="22,18" Background="Transparent" BorderThickness="0" x:Name="MainTabs">
       <TabItem Header="NUOVA RIPARAZIONE">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8,16">
           <StackPanel MaxWidth="1100">
@@ -132,7 +132,7 @@
               <DataGridTextColumn Header="Riparazione" Binding="{Binding RepairDescription}" Width="2*"/>
             </DataGrid.Columns>
           </DataGrid>
-          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="GENERA LISTA APPUNTAMENTI" Background="#138A72" Click="GenerateAppointmentList_Click"/><Button Content="AGGIORNA" Background="#6D7588" Click="RefreshArchive_Click"/><Button Content="MODIFICA" Background="#D18416" Click="EditRepair_Click"/><Button Content="ELIMINA" Background="#C43E4D" Click="DeleteRepair_Click"/><Button Content="STAMPA / GENERA PDF" Click="RegeneratePdf_Click"/></StackPanel>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="GENERA LISTA RIPARAZIONI" Background="#F5B82E" Foreground="#172033" Click="GenerateAppointmentList_Click"/><Button Content="AGGIORNA" Background="#61718D" Click="RefreshArchive_Click"/><Button Content="MODIFICA" Background="#F0A52B" Click="EditRepair_Click"/><Button Content="ELIMINA" Background="#E34F64" Click="DeleteRepair_Click"/><Button Content="STAMPA / GENERA PDF" Click="RegeneratePdf_Click"/></StackPanel>
         </Grid>
       </TabItem>
 
