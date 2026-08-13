@@ -103,6 +103,7 @@ public partial class MainWindow : Window
             MessageBox.Show(message, "Operazione completata", MessageBoxButton.OK, MessageBoxImage.Information);
             if (path is not null) Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
             ClearForm();
+            if (wasEditing) SelectSection(2);
         }
         catch (Exception ex)
         {
@@ -202,7 +203,7 @@ public partial class MainWindow : Window
         SetChecks(RepairTypesPanel, repair.RepairTypes); SetChecks(AccessoriesPanel, repair.Accessories); SetChecks(ConditionsPanel, repair.DeviceConditions);
         AppointmentDatePicker.SelectedDate = repair.AppointmentAt?.Date; AppointmentTimeBox.Text = repair.AppointmentAt?.ToString("HH:mm") ?? "";
         EmployeeCodeBox.Text = repair.EmployeeCode; _usedParts.Clear(); foreach (var part in repair.UsedParts) _usedParts.Add(new UsedPart { PartId=part.PartId,Code=part.Code,Name=part.Name,Quantity=part.Quantity });
-        SaveOnlyButton.Content = "SALVA MODIFICHE"; MainTabs.SelectedIndex = 0; FirstNameBox.Focus();
+        SaveOnlyButton.Content = "SALVA MODIFICHE"; SelectSection(0); FirstNameBox.Focus();
     }
 
     private static void SetChecks(Panel panel, List<string> values)
